@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+  workflow_dispatch:    
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node: ["14"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm install
+
+      - name: build and pack app
+        run: npm run pack
+
+      - run: dir
+
