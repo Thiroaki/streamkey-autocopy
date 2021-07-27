@@ -97,7 +97,7 @@ const createTray = () => {
  * appの動作
  */
 app.whenReady().then(async () => {
-  updater.checkUpdate()
+  await updater.checkUpdate()
   streamkeycopy.enable()
   createTray()
 })
