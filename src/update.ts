@@ -1,6 +1,7 @@
 // TODO github release を確認でアップデートを検知、実行
 import axios from "axios"
 import { exec } from "child_process"
+import { app } from "electron"
 
 const RepoApiUrl =
   "https://api.github.com/repos/Thiroaki/streamkey-autocopy/releases/latest"
@@ -18,7 +19,7 @@ function openStorePage() {
 }
 
 async function checkUpdate(): Promise<boolean> {
-  const vlocal = `v${process.env.npm_package_version}`
+  const vlocal = `v${app.getVersion()}`
   const res = await axios.get<GhRes>(RepoApiUrl).catch((err) => {
     console.log(err.response.status)
   })

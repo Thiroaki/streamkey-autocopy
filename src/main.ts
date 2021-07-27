@@ -37,7 +37,7 @@ const createTray = () => {
     {
       id: "title",
       enabled: false,
-      label: `${app.name} v${process.env.npm_package_version}`,
+      label: `${app.name} v${app.getVersion()}`,
     },
     {
       id: "update-notify",
