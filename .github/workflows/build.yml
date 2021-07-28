@@ -1,4 +1,4 @@
-name: Build
+name: Build & Release
 
 on:
   push:
@@ -18,11 +18,12 @@ jobs:
       - name: Set version
         id: version
         run: |
-          $REPOSITORY = $GITHUB_REPOSITORY.split("/")[-1]
-          $GITHUB_REF -match "(?<=refs/tag/)v\d.\d.\d"
-          $VERSION = $Matches[0]
-          echo ::set-output name=version::$VERSION
-          echo ::set-output name=filename::$REPOSITORY-$VERSION
+          $REPOSITORY = "${{ github.repository }}".split("/")[-1]
+          $VERSION = "${{ github.ref }}".split("/")[-1]
+          echo "::set-output name=version::$VERSION"
+          echo "::set-output name=repo::$REPOSITORY"
+          echo "::set-output name=filename::$REPOSITORY-$VERSION.zip"
+          echo "Repo $REPOSITORY"
           echo "Version $VERSION"
 
       - uses: actions/checkout@v2
@@ -44,20 +45,44 @@ jobs:
 
       - name: Copy release file
         run: |
-          cp -r ./release/win-unpacked/resources ./release/streamkey-autocopy
-          cp ./release/win-unpacked/ffmpeg.dll ./release/streamkey-autocopy
-          cp ./release/win-unpacked/icudtl.dat ./release/streamkey-autocopy
-          cp ./release/win-unpacked/resources.pak ./release/streamkey-autocopy
-          cp ./release/win-unpacked/snapshot_blob.bin ./release/streamkey-autocopy
-          cp ./release/win-unpacked/streamkey-autocopy.exe ./release/streamkey-autocopy
-          cp ./release/win-unpacked/v8_context_snapshot.bin ./release/streamkey-autocopy
-          cp ./LICENSE ./release/streamkey-autocopy
-          cp ./README.md ./release/streamkey-autocopy
+          mkdir ${{ steps.version.outputs.repo }}
+          cd ./${{ steps.version.outputs.repo }}
+          cp -r ../release/win-unpacked/resources ./resources
+          cp ../release/win-unpacked/ffmpeg.dll .
+          cp ../release/win-unpacked/icudtl.dat .
+          cp ../release/win-unpacked/resources.pak .
+          cp ../release/win-unpacked/snapshot_blob.bin .
+          cp ../release/win-unpacked/streamkey-autocopy.exe .
+          cp ../release/win-unpacked/v8_context_snapshot.bin .
+          cp ../LICENSE .
+          cp ../README.md .
+          cd ..
 
       - name: Archive
-        run: Compress-Archive ./release/streamkey-autocopy ./release/${{ steps.version.outputs.filename }}.zip
+        run: Compress-Archive ./${{ steps.version.outputs.repo }} ./${{ steps.version.outputs.filename }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
+          draft: true
+          prerelease: true
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.version.outputs.filename }}
+          asset_name: ${{ steps.version.outputs.filename }}
+          asset_content_type: application/zip
 
       - uses: actions/upload-artifact@v2
         with:
-          name: build-test
-          path: ./release/${{ steps.version.outputs.filename }}.zip
+          name: build-asset
+          path: ./${{ steps.version.outputs.filename }}
