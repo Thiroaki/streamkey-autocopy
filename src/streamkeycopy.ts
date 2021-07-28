@@ -25,7 +25,7 @@ const logWatcher = FileWatcher.getInstance(LogFileDir, LogFileChoki)
  * クリップボードにコピー
  */
 function sendClipboardText(text: string) {
-  exec(`echo ${text} | clip`)
+  if (text) exec(`echo ${text} | clip`)
 }
 
 function getStreamUrl(text: string) {
@@ -47,6 +47,11 @@ function matchTopazchatLog(logs: string[]) {
   return logs.filter((line) => regTopazchatLog.test(line))
 }
 
+function isPrivate(streamkey: string) {
+  const keywords = /(no.?copy|priv(ate)?|secret)/
+  return keywords.test(streamkey)
+}
+
 /**
  * ファイル監視のコールバック
  */
@@ -59,7 +64,7 @@ function onLogUpdated(lines: string[]) {
   topazLog.forEach((log) => {
     const streamkey = getStreamKeyTopazchat(getStreamUrl(log))
     // TODO: オプトアウト実装
-    sendClipboardText(streamkey)
+    if (!isPrivate(streamkey)) sendClipboardText(streamkey)
 
     // debug
     console.log(`key: ${streamkey}`)

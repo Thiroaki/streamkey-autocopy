@@ -25,7 +25,7 @@ async function checkUpdate(): Promise<boolean> {
   })
   if (res && res.data.tag_name) {
     const vremote = res.data.tag_name
-    updateAvailable = vlocal != vremote
+    updateAvailable = vlocal < vremote
   } else {
     updateAvailable = false
   }
