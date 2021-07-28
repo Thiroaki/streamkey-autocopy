@@ -15,9 +15,9 @@ jobs:
         node: ["14"]
 
     steps:
-    - name: Set version
+      - name: Set version
         id: version
-        shell: bash -xe {0}
+        shell: bash
         run: |
           REPOSITORY=$(echo ${{ github.repository }} | sed -e "s#.*/##")
           VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
