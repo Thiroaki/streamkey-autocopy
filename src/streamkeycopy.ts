@@ -8,12 +8,18 @@
 */
 
 import { exec } from "child_process"
-import VrcLogCatcher from "vrc-log-catcher"
+import path from "path"
+import FileWatcher from "append-reader"
 
+const LogFileDir = path.join(
+  process.env.USERPROFILE as string,
+  "AppData/LocalLow/VRChat/VRChat",
+)
+const LogFileChoki = "output_log_*.txt"
 const regTopazchatUrl =
   /rtsp[tu]?:\/\/topaz\.chat\/live\/[\w!\(\)%#\$&\?\(\)~=\+\-]+/
 const regTopazchatLog = /\[AVProVideo\] Opening rtsp[tu]?:\/\/topaz.chat\/live/g
-const logWatcher = new VrcLogCatcher()
+const logWatcher = FileWatcher.getInstance(LogFileDir, LogFileChoki)
 
 /**
  * クリップボードにコピー
