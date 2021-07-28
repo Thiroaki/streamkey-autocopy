@@ -5,7 +5,7 @@ on:
     tags:
       - "v*.*.*"
 
-  workflow_dispatch:    
+  workflow_dispatch:
 
 jobs:
   build:
@@ -15,6 +15,16 @@ jobs:
         node: ["14"]
 
     steps:
+    - name: Set version
+        id: version
+        shell: bash -xe {0}
+        run: |
+          REPOSITORY=$(echo ${{ github.repository }} | sed -e "s#.*/##")
+          VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          echo ::set-output name=version::$VERSION
+          echo ::set-output name=filename::$REPOSITORY-$VERSION
+          echo "Version $VERSION"
+
       - uses: actions/checkout@v2
 
       - uses: webfactory/ssh-agent@v0.5.3
@@ -24,17 +34,30 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
 
-      - run: npm install
+      - name: Install package
+        run: yarn install
 
-      - name: build and pack app
-        run: npm run pack
+      - name: Build and pack app
+        run: yarn run pack
 
-      - run: dir ./release
-      
+      - name: Copy release file
+        run: |
+          cp -r ./release/win-unpacked/resources ./release/streamkey-autocopy
+          cp ./release/win-unpacked/ffmpeg.dll ./release/streamkey-autocopy
+          cp ./release/win-unpacked/icudtl.dat ./release/streamkey-autocopy
+          cp ./release/win-unpacked/resources.pak ./release/streamkey-autocopy
+          cp ./release/win-unpacked/snapshot_blob.bin ./release/streamkey-autocopy
+          cp ./release/win-unpacked/streamkey-autocopy.exe ./release/streamkey-autocopy
+          cp ./release/win-unpacked/v8_context_snapshot.bin ./release/streamkey-autocopy
+          cp ./LICENSE ./release/streamkey-autocopy
+          cp ./README.md ./release/streamkey-autocopy
+
+      - name: Archive
+        run: Compress-Archive ./release/streamkey-autocopy ./release/${{ steps.version.outputs.filename }}.zip
+
       - uses: actions/upload-artifact@v2
-        with: 
+        with:
           name: build-test
-          path: ./release
-
+          path: ./release/${{ steps.version.outputs.filename }}.zip
