@@ -3,9 +3,7 @@
   "version": "1.1.1",
   "description": "Tool for VRChat",
   "main": "dist/main.js",
-  "repository": {
-
-  },
+  "repository": {},
   "files": [
     "dist"
   ],
@@ -23,8 +21,8 @@
   "author": "Thiroaki",
   "license": "",
   "dependencies": {
-    "axios": "^0.21.1",
-    "vrc-log-catcher": "git+ssh://git@github.com/Thiroaki/vrc-log-catcher.git"
+    "append-reader": "git+ssh://git@github.com/Thiroaki/append-reader.git",
+    "axios": "^0.21.1"
   },
   "devDependencies": {
     "@types/node": "^14.17.6",
