@@ -17,10 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: webfactory/ssh-agent@0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+
       - run: npm install
 
       - name: build and pack app
