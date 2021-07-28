@@ -1,4 +1,4 @@
-name: Build
+name: Build & Release
 
 on:
   push:
@@ -71,7 +71,7 @@ jobs:
           release_name: Release ${{ steps.version.outputs.version }}
           draft: true
           prerelease: true
-          
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
@@ -84,5 +84,5 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: build-test
+          name: build-asset
           path: ./${{ steps.version.outputs.filename }}
