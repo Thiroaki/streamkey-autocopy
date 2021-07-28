@@ -1,0 +1,63 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node: ["14"]
+
+    steps:
+      - name: Set version
+        id: version
+        run: |
+          $REPOSITORY = "${{ github.repository }}".split("/")[-1]
+          "${{ github.ref }}" -match "(?<=refs/tag/)v\d.\d.\d"
+          $VERSION = $Matches[0]
+          echo ::set-output name=version::$VERSION
+          echo ::set-output name=filename::$REPOSITORY-$VERSION
+          echo "Version $VERSION"
+
+      - uses: actions/checkout@v2
+
+      - uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - name: Install package
+        run: yarn install
+
+      - name: Build and pack app
+        run: yarn run pack
+
+      - name: Copy release file
+        run: |
+          cp -r ./release/win-unpacked/resources ./release/streamkey-autocopy
+          cp ./release/win-unpacked/ffmpeg.dll ./release/streamkey-autocopy
+          cp ./release/win-unpacked/icudtl.dat ./release/streamkey-autocopy
+          cp ./release/win-unpacked/resources.pak ./release/streamkey-autocopy
+          cp ./release/win-unpacked/snapshot_blob.bin ./release/streamkey-autocopy
+          cp ./release/win-unpacked/streamkey-autocopy.exe ./release/streamkey-autocopy
+          cp ./release/win-unpacked/v8_context_snapshot.bin ./release/streamkey-autocopy
+          cp ./LICENSE ./release/streamkey-autocopy
+          cp ./README.md ./release/streamkey-autocopy
+
+      - name: Archive
+        run: Compress-Archive ./release/streamkey-autocopy ./release/${{ steps.version.outputs.filename }}.zip
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-test
+          path: ./release/${{ steps.version.outputs.filename }}.zip
