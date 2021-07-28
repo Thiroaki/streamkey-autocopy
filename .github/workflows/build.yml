@@ -15,12 +15,12 @@ jobs:
         node: ["14"]
 
     steps:
-    - name: Set version
+      - name: Set version
         id: version
-        shell: bash -xe {0}
         run: |
-          REPOSITORY=$(echo ${{ github.repository }} | sed -e "s#.*/##")
-          VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          $REPOSITORY = $GITHUB_REPOSITORY.split("/")[-1]
+          $GITHUB_REF -match "(?<=refs/tag/)v\d.\d.\d"
+          $VERSION = $Matches[0]
           echo ::set-output name=version::$VERSION
           echo ::set-output name=filename::$REPOSITORY-$VERSION
           echo "Version $VERSION"
