@@ -25,7 +25,7 @@ const logWatcher = FileWatcher.getInstance(LogFileDir, LogFileChoki)
  * クリップボードにコピー
  */
 function sendClipboardText(text: string) {
-  exec(`echo ${text} | clip`)
+  if (text) exec(`echo ${text} | clip`)
 }
 
 function getStreamUrl(text: string) {
