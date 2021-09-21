@@ -19,7 +19,7 @@ shell:startup
 
 ## コピーされないキー
 ストリームキーに所定の単語が含まれていた場合はコピーをスキップします。  
-例：`nocopy`, `priv`, `secret`  
+例：`nocopy`, `no_copy`, `priv`, `private`, `secret`  
 
 # 動作確認環境
 Windows 10 64bit  
